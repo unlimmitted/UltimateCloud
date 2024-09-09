@@ -1,58 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:ultimate_cloude/search.dart';
+
+import 'files.dart';
 
 void main() => runApp(App());
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.white,
-        fontFamily: 'Inter',
-      ),
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'UltimateCloud',
-            style: TextStyle(fontSize: 30),
-          ),
-        ),
-        body: const MainContent(),
-      ),
+      home: Navigation(),
     );
   }
 }
 
-class MainContent extends StatelessWidget {
-  const MainContent({Key? key}) : super(key: key);
-
-  static const String imageUrl =
-      'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHZjZnNoaGlnam05NnJmYnNodHBscGhvcGRjaDVjaThwaDJycWcycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SMZlv6CzzUXqU/giphy.webp';
+class Navigation extends StatefulWidget {
+  const Navigation({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Center(
-        child: Container(
-          child: Column(
-            children: List.generate(15, (index) => ImageContainer()),
-          ),
-        ),
-      ),
-    );
-  }
+  State<Navigation> createState() => _NavigationState();
 }
 
-class ImageContainer extends StatelessWidget {
-  const ImageContainer({Key? key}) : super(key: key);
+class _NavigationState extends State<Navigation> {
+  int _selectedIndex = 0;
+  static const TextStyle optionStyle =
+  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    MainContent(),
+    SearchContainer(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(5),
-      child: const Image(
-        image: NetworkImage(MainContent.imageUrl),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'UltimateCloud',
+          style: TextStyle(fontSize: 30, fontFamily: 'Inter'),
+        ),
+      ),
+      body: _widgetOptions.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'My files',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }
