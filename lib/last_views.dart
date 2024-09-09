@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class FilesContent extends StatelessWidget {
-  const FilesContent({super.key});
+class LastViewsContent extends StatelessWidget {
+  const LastViewsContent({super.key});
 
   static const String imageUrl =
-      'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTJpYTRkMGZwM2RkN2hsMGRicXY2YjNnYmhncmIxZ2RxNGVoZHp5NSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/iHmodiTc8t0BO/giphy.webp';
+      'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHZjZnNoaGlnam05NnJmYnNodHBscGhvcGRjaDVjaThwaDJycWcycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SMZlv6CzzUXqU/giphy.webp';
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class ImageWithText extends StatelessWidget {
       child: const Column(
         children: [
           Image(
-            image: NetworkImage(FilesContent.imageUrl),
+            image: NetworkImage(LastViewsContent.imageUrl),
           ),
           SizedBox(height: 5),
           Text(

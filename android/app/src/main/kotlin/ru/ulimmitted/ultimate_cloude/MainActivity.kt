@@ -1,4 +1,4 @@
-package ru.ulimmitted.ultimate_cloude
+package ru.ulimmitted.ultimate_cloud
 
 import io.flutter.embedding.android.FlutterActivity
 

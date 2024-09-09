@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:ultimate_cloude/search.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:ultimate_cloud/last_views.dart';
+import 'package:ultimate_cloud/search.dart';
+import 'package:ultimate_cloud/files.dart';
+import 'package:ultimate_cloud/video_player.dart';
 
-import 'files.dart';
-
-void main() => runApp(App());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
+  runApp(
+    const MaterialApp(
+      home: App(),
+    ),
+  );
+}
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -25,7 +37,8 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   static const List<Widget> _widgetOptions = <Widget>[
-    MainContent(),
+    LastViewsContent(),
+    VideoScreen(),
     SearchContainer(),
   ];
 
@@ -49,6 +62,10 @@ class _NavigationState extends State<Navigation> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
+            label: 'Last views',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insert_drive_file_sharp),
             label: 'My files',
           ),
           BottomNavigationBarItem(
@@ -57,7 +74,7 @@ class _NavigationState extends State<Navigation> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.black,
         onTap: _onItemTapped,
       ),
     );

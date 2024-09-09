@@ -9,9 +9,9 @@ class SearchContainer extends StatelessWidget {
       margin: const EdgeInsets.all(20),
       child: Column(
         children: [
-          Align(
+          const Align(
             alignment: Alignment.topLeft,
-            child: const Text(
+            child: Text(
               'Search',
               style: TextStyle(fontSize: 20),
             ),

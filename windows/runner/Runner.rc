@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "ru.ulimmitted" "\0"
-            VALUE "FileDescription", "ultimate_cloude" "\0"
+            VALUE "FileDescription", "ultimate_cloud" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ultimate_cloude" "\0"
+            VALUE "InternalName", "ultimate_cloud" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 ru.ulimmitted. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ultimate_cloude.exe" "\0"
-            VALUE "ProductName", "ultimate_cloude" "\0"
+            VALUE "OriginalFilename", "ultimate_cloud.exe" "\0"
+            VALUE "ProductName", "ultimate_cloud" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
