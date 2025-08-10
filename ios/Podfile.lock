@@ -36,7 +36,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_vlc_player (3.0.3):
     - Flutter
-    - MobileVLCKit (~> 3.6.0b12)
+    - MobileVLCKit (~> 3.6.1b1)
   - media_kit_libs_ios_video (1.0.4):
     - Flutter
   - media_kit_video (0.0.1):
@@ -94,7 +94,7 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_vlc_player: adffbf4816d69407ca712e4cc1ff1d257b4fd0a9
+  flutter_vlc_player: 5464f594a9338e080d240bbe7b10ffe30c7bc8bc
   media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
   media_kit_video: 1746e198cb697d1ffb734b1d05ec429d1fcd1474
   MobileVLCKit: 2d9c7c373393ae43086aeeff890bf0b1afc15c5c

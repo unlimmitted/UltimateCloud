@@ -24,15 +24,12 @@ class _SearchContainerState extends State<SearchContainer> {
       });
       return;
     }
-
     setState(() {
       _isLoading = true;
     });
-
     final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/search-by-kinopoisk?query=$text");
-
     try {
-      final response = await http.get(url);
+      final response = await http.get(url).timeout(const Duration(minutes: 5));
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final data = jsonDecode(decoded);
@@ -90,7 +87,7 @@ class _SearchContainerState extends State<SearchContainer> {
               ),
               onChanged: _onTextChanged,
             ),
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -122,13 +119,20 @@ class _SearchContainerState extends State<SearchContainer> {
                                   children: [
                                     if (posterUrl != null)
                                       SizedBox(
-                                        width: MediaQuery.of(context).size.width / 3,
+                                        width: MediaQuery.of(context).size.width / 4,
                                         child: AspectRatio(
                                           aspectRatio: 2 / 3,
-                                          child: Image.network(
-                                            posterUrl,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image_outlined),
+                                          child: ClipRRect(
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(8.0),
+                                              bottomLeft: Radius.circular(8.0),
+                                            ),
+                                            child: Image.network(
+                                              posterUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) =>
+                                                  const Icon(Icons.broken_image_outlined),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -142,9 +146,20 @@ class _SearchContainerState extends State<SearchContainer> {
                                               title,
                                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                             ),
+                                            if (result['alternativeName'] != null &&
+                                                result['alternativeName'].toString().isNotEmpty)
+                                              Text(
+                                                result['alternativeName'],
+                                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                              ),
                                             if (result['year'] != null)
                                               Text(
-                                                "Год выпуска: ${result['year']}",
+                                                result['year'].toString(),
+                                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                              ),
+                                            if (result['movieLength'] != null && result['movieLength'] > 0)
+                                              Text(
+                                                "${result['movieLength']} мин",
                                                 style: const TextStyle(fontSize: 14, color: Colors.grey),
                                               ),
                                           ],
@@ -177,6 +192,7 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   List<dynamic> _rutrackerResults = [];
   bool _isLoadingRutracker = true;
+  String? _downloadingTorrentHash;
 
   @override
   void initState() {
@@ -195,14 +211,14 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _fetchRutrackerResults() async {
-    final name = widget.item['name'] ?? widget.item['alternativeName'] ?? '';
+    final name = "${widget.item['name']} ${widget.item['alternativeName']}";
     final query = widget.item['isSeries'] ? name : "$name ${widget.item['year']}";
     if (query.isEmpty) {
       return;
     }
     final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/search-by-rutracker?query=$query");
     try {
-      final response = await http.get(url);
+      final response = await http.get(url).timeout(const Duration(minutes: 5));
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final data = jsonDecode(decoded);
@@ -224,18 +240,39 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  Future<void> _downloadMovie(torrent) async {
+  Future<void> _downloadMovie(Map<String, dynamic> torrent, String hash) async {
+    setState(() {
+      _downloadingTorrentHash = hash;
+    });
+
     final url = Uri.parse("https://ulcloud.ru/api/v1/torrent/download-by-transmission");
     try {
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode(torrent));
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(torrent),
+          )
+          .timeout(const Duration(minutes: 5));
       if (response.statusCode == 200) {
-      } else {}
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Торрент добавлен на загрузку"),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Ошибка добавления"),
+        ));
+      }
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Ошибка добавления"),
+      ));
       print("Ошибка Transmission: $e");
-      setState(() {
-        _isLoadingRutracker = false;
-      });
     }
+
+    setState(() {
+      _downloadingTorrentHash = null;
+    });
   }
 
   @override
@@ -348,26 +385,29 @@ class _DetailScreenState extends State<DetailScreen> {
                   else
                     ..._rutrackerResults.map((torrent) {
                       final seeds = torrent['seeds'] ?? 0;
+                      final downloads =
+                          torrent['downloads'] > 1000 ? "${torrent['downloads'] ~/ 1000}k" : torrent['downloads'] ?? 0;
                       final resolution = _getResolution(torrent['movieResolution']);
                       final sizeMb = (torrent['size'] ?? 0).toDouble();
                       final size = _formatSize(sizeMb);
+                      final hash = torrent['hash'] ?? torrent['title'];
                       return Card(
                         elevation: 2,
                         margin: const EdgeInsets.symmetric(vertical: 6),
                         child: ListTile(
-                          title: Text("Сиды: $seeds"),
+                          title: Text("Скачан $downloads раз\nСиды: $seeds"),
                           subtitle: Text("Разрешение: $resolution\nРазмер: $size"),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.info_outline),
-                                tooltip: "Информация о торренте",
+                                tooltip: "Название раздачи",
                                 onPressed: () {
                                   showDialog(
                                     context: context,
                                     builder: (_) => AlertDialog(
-                                      title: const Text("Информация о торренте"),
+                                      title: const Text("Название раздачи"),
                                       content: SingleChildScrollView(
                                         child: Text(torrent["title"]),
                                       ),
@@ -383,13 +423,20 @@ class _DetailScreenState extends State<DetailScreen> {
                                   );
                                 },
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.download_outlined),
-                                tooltip: "Скачать",
-                                onPressed: () {
-                                  _downloadMovie(torrent);
-                                },
-                              ),
+                              _downloadingTorrentHash == hash
+                                  ? const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 10),
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(Icons.download_outlined),
+                                      tooltip: "Скачать",
+                                      onPressed: () => _downloadMovie(torrent, hash),
+                                    ),
                             ],
                           ),
                         ),

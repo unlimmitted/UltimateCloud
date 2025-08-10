@@ -169,7 +169,7 @@ class FilesScreenState extends State<FilesScreen> {
             ),
       floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.grey[300],
         overlayOpacity: 0.1,
         children: [
           SpeedDialChild(

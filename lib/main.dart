@@ -63,7 +63,7 @@ class _NavigationState extends State<Navigation> {
     if (_selectedIndex == 0) {
       return SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.grey[300],
         overlayOpacity: 0.1,
         children: [
           SpeedDialChild(
