@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:ultimate_cloud/auth/auth_gate.dart';
+import 'package:ultimate_cloud/files.dart';
 import 'package:ultimate_cloud/last_views.dart';
 import 'package:ultimate_cloud/search.dart';
-import 'package:ultimate_cloud/files.dart';
 import 'package:ultimate_cloud/settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
-  runApp(
-    const MaterialApp(
-      home: App(),
-    ),
-  );
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -23,7 +18,9 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Navigation(),
+      home: AuthGate(
+        child: Navigation(),
+      ),
     );
   }
 }
@@ -85,7 +82,10 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
+      ),
       floatingActionButton: _buildFab(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
