@@ -9,6 +9,8 @@ import 'package:ultimate_cloud/video_player.dart';
 
 import 'network/api_client.dart';
 
+enum _FileMenuAction { delete }
+
 class FilesScreen extends StatefulWidget {
   final String? currentPath;
 
@@ -224,6 +226,110 @@ class FilesScreenState extends State<FilesScreen> {
     return lines.isEmpty ? null : Text(lines.join('\n'));
   }
 
+  Future<void> _showFileContextMenu({
+    required Offset globalPosition,
+    required String fullPath,
+    required String name,
+    required bool isFolder,
+  }) async {
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final action = await showMenu<_FileMenuAction>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromPoints(globalPosition, globalPosition),
+        Offset.zero & overlay.size,
+      ),
+      items: const [
+        PopupMenuItem<_FileMenuAction>(
+          value: _FileMenuAction.delete,
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline),
+              SizedBox(width: 12),
+              Text('Удалить'),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _FileMenuAction.delete:
+        await _confirmAndDelete(
+          fullPath: fullPath,
+          name: name,
+          isFolder: isFolder,
+        );
+    }
+  }
+
+  Future<void> _confirmAndDelete({
+    required String fullPath,
+    required String name,
+    required bool isFolder,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isFolder ? 'Удалить папку?' : 'Удалить файл?'),
+        content: Text(
+          isFolder
+              ? 'Папка «$name» и всё её содержимое будут удалены.'
+              : 'Файл «$name» будет удалён.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Отмена'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final uri = ApiClient.uri(
+        '/api/v1/storage/delete',
+        {'path': fullPath},
+      );
+      final cookie = await ApiClient.cookie;
+      final response = await http.delete(
+        uri,
+        headers: {
+          if (cookie != null && cookie.isNotEmpty) 'Cookie': cookie,
+        },
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        await _fetchFiles();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isFolder ? 'Папка удалена' : 'Файл удалён')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка удаления: ${response.statusCode}')),
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Ошибка удаления $fullPath: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось удалить файл или папку')),
+      );
+    }
+  }
+
   Future<void> uploadFile() async {
     if (_isTvos) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -376,6 +482,13 @@ class FilesScreenState extends State<FilesScreen> {
                 onPressed: () => Navigator.pop(context),
               )
             : null,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Обновить список',
+            onPressed: _isLoading ? null : _fetchFiles,
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -394,38 +507,53 @@ class FilesScreenState extends State<FilesScreen> {
                       final metadata = _findTorrentMetadata(fullPath);
                       final posterUrl = metadata?['posterUrl']?.toString();
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          minLeadingWidth: 56,
-                          leading: _buildFileLeading(
-                            isFolder: isFolder,
-                            progress: progress,
-                            posterUrl: posterUrl,
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onLongPressStart: (details) => _showFileContextMenu(
+                          globalPosition: details.globalPosition,
+                          fullPath: fullPath,
+                          name: name,
+                          isFolder: isFolder,
+                        ),
+                        onSecondaryTapDown: (details) => _showFileContextMenu(
+                          globalPosition: details.globalPosition,
+                          fullPath: fullPath,
+                          name: name,
+                          isFolder: isFolder,
+                        ),
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: ListTile(
+                            minLeadingWidth: 56,
+                            leading: _buildFileLeading(
+                              isFolder: isFolder,
+                              progress: progress,
+                              posterUrl: posterUrl,
+                            ),
+                            title: Text(name),
+                            subtitle: _buildSubtitle(
+                              isFolder: isFolder,
+                              progress: progress,
+                              metadata: metadata,
+                            ),
+                            onTap: () {
+                              if (isFolder) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FilesScreen(currentPath: fullPath),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => VideoScreen(filename: fullPath),
+                                  ),
+                                );
+                              }
+                            },
                           ),
-                          title: Text(name),
-                          subtitle: _buildSubtitle(
-                            isFolder: isFolder,
-                            progress: progress,
-                            metadata: metadata,
-                          ),
-                          onTap: () {
-                            if (isFolder) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => FilesScreen(currentPath: fullPath),
-                                ),
-                              );
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => VideoScreen(filename: fullPath),
-                                ),
-                              );
-                            }
-                          },
                         ),
                       );
                     },

@@ -10,13 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-#  media_kit: ^1.1.11
-#  media_kit_video: ^1.2.5
-#  media_kit_libs_video: ^1.0.5
-#  media_kit_libs_macos_video: ^1.1.4
-
   cupertino_icons: ^1.0.8
   flutter_vlc_player_16kb: ^7.4.4
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_windows_video: ^1.0.11
+#  media_kit_libs_video: ^1.0.5
+#  media_kit_libs_macos_video: ^1.1.4
   file_picker: ^10.0.0
   flutter_speed_dial: ^7.0.0
   http: ^1.2.0

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class LastViewsContent extends StatelessWidget {
   const LastViewsContent({super.key});
 
-  static const String imageUrl =
-      'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHZjZnNoaGlnam05NnJmYnNodHBscGhvcGRjaDVjaThwaDJycWcycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SMZlv6CzzUXqU/giphy.webp';
+  // static const String imageUrl =
+  //     'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHZjZnNoaGlnam05NnJmYnNodHBscGhvcGRjaDVjaThwaDJycWcycCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SMZlv6CzzUXqU/giphy.webp';
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +30,9 @@ class ImageWithText extends StatelessWidget {
       margin: const EdgeInsets.all(5),
       child: const Column(
         children: [
-          Image(
-            image: NetworkImage(LastViewsContent.imageUrl),
-          ),
+          // Image(
+          //   image: NetworkImage(LastViewsContent.imageUrl),
+          // ),
           SizedBox(height: 5),
           Text(
             'Text',

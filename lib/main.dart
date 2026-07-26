@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:ultimate_cloud/auth/auth_gate.dart';
 import 'package:ultimate_cloud/files.dart';
 import 'package:ultimate_cloud/last_views.dart';
@@ -8,6 +11,11 @@ import 'package:ultimate_cloud/settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows) {
+    MediaKit.ensureInitialized();
+  }
+
   runApp(const App());
 }
 
@@ -81,9 +89,13 @@ class _NavigationState extends State<Navigation> {
 
   @override
   Widget build(BuildContext context) {
+    final safeIndex = _selectedIndex >= 0 && _selectedIndex < _widgetOptions.length
+        ? _selectedIndex
+        : 0;
+
     return Scaffold(
       body: IndexedStack(
-        index: _selectedIndex,
+        index: safeIndex,
         children: _widgetOptions,
       ),
       floatingActionButton: _buildFab(),
@@ -106,7 +118,7 @@ class _NavigationState extends State<Navigation> {
             label: 'Settings',
           ),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: safeIndex,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         onTap: _onItemTapped,
